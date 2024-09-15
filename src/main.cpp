@@ -6,6 +6,10 @@
 #include <raylib.h>
 #include <raymath.h>
 
+static size_t health    = 100;
+static size_t round_num = 1;
+static size_t money     = 100;
+
 void draw_play_area() {
     for (int y = 0; y < play_area_rect.height / TileSize; y++) {
         for (int x = 0; x < play_area_rect.width / TileSize; x++) {
@@ -18,10 +22,12 @@ void draw_play_area() {
 void draw_stats(Font font) {
     const size_t font_size = 48;
     Vector2 size           = MeasureTextEx(font, "", font_size, 0);
-    DrawTextEx(font, "Health: ", {10, 10}, font_size, size.x, WHITE);
-    DrawTextEx(font, "Money: ", {10, 10 + size.y}, font_size, size.x, WHITE);
-    DrawTextEx(font, "Round: ", {10, 10 + size.y * 2}, font_size, size.x,
-               WHITE);
+    DrawTextEx(font, TextFormat("Health: 100/%d", health), {10, 10}, font_size,
+               size.x, WHITE);
+    DrawTextEx(font, TextFormat("Money: %d", money), {10, 10 + size.y},
+               font_size, size.x, WHITE);
+    DrawTextEx(font, TextFormat("Round: %d", round_num), {10, 10 + size.y * 2},
+               font_size, size.x, WHITE);
 }
 
 struct Enemy {
@@ -114,7 +120,7 @@ int main() {
         BeginDrawing();
         ClearBackground(GetColor(0x181818ff));
         DrawRectangleRec(tower_menu_rect, RED);
-        draw_play_area();
+        // draw_play_area();
         draw_stats(font);
         p.Draw();
         DrawCircleV(e.pos, 10, WHITE);
