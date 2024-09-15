@@ -2,6 +2,7 @@
 
 #include "config.hpp"
 
+#include <cstdio>
 #include <raymath.h>
 #include <vector>
 
@@ -35,3 +36,17 @@ void Path::Draw() const {
 const Vector2& Path::Beginning() const { return points[0]; }
 
 const std::vector<Vector2>& Path::GetPoints() const { return points; }
+
+void Path::Save(const char* out, size_t n) {
+    FILE* file = fopen(out, "wb");
+    fputc(n, file);
+
+    for (int i = 0; i < n; i++) {
+        const Vector2& point = points[i];
+        uint8_t x            = (point.x - (TileSize / 2.0)) / TileSize;
+        uint8_t y            = (point.y - (TileSize / 2.0)) / TileSize;
+        fputc(x, file);
+        fputc(y, file);
+    }
+    fclose(file);
+}

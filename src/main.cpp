@@ -1,9 +1,11 @@
 #include "config.hpp"
 #include "path.hpp"
 
+#include <cmath>
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <iostream>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -111,7 +113,7 @@ public:
 
 int game_main() {
     Font font = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
-    Path p("assets/level1.path");
+    Path p("assets/test_path.path");
     Enemy e(p);
 
     while (!WindowShouldClose()) {
@@ -130,14 +132,55 @@ int game_main() {
 }
 
 int pather_main() {
-    Font font    = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
-    bool editing = false;
+    Font font              = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
+    bool editing           = false;
+    const size_t font_size = 48;
+    Vector2 size           = MeasureTextEx(font, "", font_size, 0);
+
+    while (!editing) {
+        BeginDrawing();
+        ClearBackground(GetColor(0x181818ff));
+        DrawTextEx(font, "To Begin Press 'a'", {10, 10}, font_size, size.x,
+                   WHITE);
+        if (IsKeyDown(KEY_A)) {
+            editing = true;
+        }
+        EndDrawing();
+    }
+
+    Path p;
+    int n = 0;
 
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(GetColor(0x181818ff));
+        DrawRectangleLines(tower_menu_rect.x, tower_menu_rect.y,
+                           tower_menu_rect.width, tower_menu_rect.height,
+                           WHITE);
+        draw_play_area();
+        if (p.GetPoints().empty()) {
+            DrawTextEx(
+                font,
+                "Click a point in the grid to mark the beginning of the path",
+                {10, tower_menu_rect.y + 10}, font_size, size.x, WHITE);
+        } else {
+            DrawTextEx(
+                font,
+                "Press `esc` to save the path (to the cwd with name path.path)",
+                {10, tower_menu_rect.y + 10}, font_size, size.x, WHITE);
+        }
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            Vector2 mouse_pos = GetMousePosition();
+            Vector2 grid_pos  = Vector2Divide(mouse_pos, {TileSize, TileSize});
+            grid_pos.x        = floorf(grid_pos.x);
+            grid_pos.y        = floorf(grid_pos.y);
+            p.Push(grid_pos);
+            n++;
+        }
+        p.Draw();
         EndDrawing();
     }
+    p.Save("path.path", n);
     CloseWindow();
     return 0;
 }
