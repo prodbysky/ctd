@@ -23,6 +23,7 @@ void draw_stats(Font font) {
     DrawTextEx(font, "Round: ", {10, 10 + size.y * 2}, font_size, size.x,
                WHITE);
 }
+
 struct Enemy {
 public:
     Vector2 pos;
@@ -53,6 +54,9 @@ public:
     }
 
     void Update(const Path& p) {
+        if (finished) {
+            return;
+        }
         bool y   = false;
         bool x   = false;
         float dt = GetFrameTime();
