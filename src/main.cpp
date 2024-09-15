@@ -1,39 +1,10 @@
+#include "config.hpp"
+#include "path.hpp"
+
 #include <cstddef>
-#include <cstdint>
 #include <cstdio>
-#include <iostream>
-#include <memory>
 #include <raylib.h>
 #include <raymath.h>
-#include <vector>
-
-constexpr Vector2 WindowSize = {
-    .x = 1920,
-    .y = 1080,
-};
-
-constexpr uint8_t TileSize = 96;
-
-constexpr Rectangle tower_menu_rect = {
-    .x      = 0,
-    .y      = WindowSize.y - WindowSize.y / 5,
-    .width  = WindowSize.x,
-    .height = WindowSize.y / 5,
-};
-
-constexpr Rectangle play_area_rect = {
-    .x      = 0,
-    .y      = 0,
-    .width  = WindowSize.x,
-    .height = WindowSize.y - WindowSize.y / 5,
-};
-
-constexpr Rectangle stats_rect = {
-    .x      = 0,
-    .y      = 0,
-    .width  = WindowSize.x / 6,
-    .height = WindowSize.y / 6,
-};
 
 void draw_play_area() {
     for (int y = 0; y < play_area_rect.height / TileSize; y++) {
@@ -52,55 +23,97 @@ void draw_stats(Font font) {
     DrawTextEx(font, "Round: ", {10, 10 + size.y * 2}, font_size, size.x,
                WHITE);
 }
+struct Enemy {
+public:
+    Vector2 pos;
 
-class Path {
-    std::vector<Vector2> points;
+private:
+    Vector2 target;
+    float speed;
+    size_t n_points;
+    size_t curr_target_i;
+    bool finished;
 
 public:
-    Path() = default;
-    Path(const char* file_name) {
-        points     = std::vector<Vector2>();
-        FILE* file = fopen(file_name, "rb");
+    Enemy(const Path& p) {
+        curr_target_i = 1;
+        finished      = false;
+        n_points      = p.GetPoints().size();
+        pos           = p.Beginning();
+        target        = p.GetPoints()[curr_target_i];
+        speed         = 200;
+    }
 
-        size_t n = fgetc(file);
-
-        for (; n > 0; n--) {
-            size_t x = (fgetc(file) * TileSize) + TileSize / 2.0;
-            size_t y = (fgetc(file) * TileSize) + TileSize / 2.0;
-            points.push_back({static_cast<float>(x), static_cast<float>(y)});
+    void NextTarget(const Path& p) {
+        if (curr_target_i + 1 != n_points) {
+            target = p.GetPoints()[++curr_target_i];
+            return;
         }
-        fclose(file);
+        finished = true;
     }
 
-    void Push(Vector2 point) {
-        points.emplace_back(
-            Vector2Add(Vector2Multiply(point, {TileSize, TileSize}),
-                       {TileSize / 2.0, TileSize / 2.0}));
-    }
+    void Update(const Path& p) {
+        bool y   = false;
+        bool x   = false;
+        float dt = GetFrameTime();
+        if (target.x - pos.x == 0)
+            y = true;
+        if (target.y - pos.y == 0)
+            x = true;
 
-    void Draw() {
-        for (size_t i = 0; i < points.size(); i++) {
-            if (i + 1 != points.size()) {
-                DrawLineV(points[i], points[i + 1], WHITE);
+        if (x) {
+            if (pos.x < target.x) {
+                pos.x += speed * dt;
+                pos.x  = Clamp(pos.x, pos.x, target.x);
+                if (pos.x == target.x) {
+                    NextTarget(p);
+                    return;
+                }
+            } else {
+                pos.x -= speed * dt;
+
+                pos.x = Clamp(pos.x, target.x, pos.x);
+                if (pos.x == target.x) {
+                    NextTarget(p);
+                    return;
+                }
+            }
+        } else {
+            if (pos.y < target.y) {
+                pos.y += speed * dt;
+                pos.y  = Clamp(pos.y, pos.y, target.y);
+                if (pos.y == target.y) {
+                    NextTarget(p);
+                    return;
+                }
+            } else {
+                pos.y -= speed * dt;
+                pos.y  = Clamp(pos.y, target.y, pos.y);
+                if (pos.y == target.y) {
+                    NextTarget(p);
+                    return;
+                }
             }
         }
     }
 };
 
 int main() {
-    SetConfigFlags(FLAG_FULLSCREEN_MODE);
-    SetConfigFlags(FLAG_VSYNC_HINT);
+    SetConfigFlags(FLAG_FULLSCREEN_MODE | FLAG_VSYNC_HINT);
     InitWindow(WindowSize.x, WindowSize.y, "Hello world!");
     Font font = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
     Path p("assets/level1.path");
+    Enemy e(p);
 
     while (!WindowShouldClose()) {
+        e.Update(p);
         BeginDrawing();
         ClearBackground(GetColor(0x181818ff));
         DrawRectangleRec(tower_menu_rect, RED);
         draw_play_area();
         draw_stats(font);
         p.Draw();
+        DrawCircleV(e.pos, 10, WHITE);
         EndDrawing();
     }
     CloseWindow();

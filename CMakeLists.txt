@@ -17,7 +17,10 @@ add_custom_target(copy_assets ALL
 )
 
 
-set(SOURCES src/main.cpp)
+set(SOURCES 
+    src/main.cpp
+    src/path.cpp
+)
 
 add_executable(ctd ${SOURCES})
 target_include_directories(ctd PRIVATE ${CMAKE_SOURCE_DIR}/external/raylib/src)
