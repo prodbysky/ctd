@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdio>
+#include <cstring>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -108,9 +109,7 @@ public:
     }
 };
 
-int main() {
-    SetConfigFlags(FLAG_FULLSCREEN_MODE | FLAG_VSYNC_HINT);
-    InitWindow(WindowSize.x, WindowSize.y, "Hello world!");
+int game_main() {
     Font font = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
     Path p("assets/level1.path");
     Enemy e(p);
@@ -127,4 +126,30 @@ int main() {
         EndDrawing();
     }
     CloseWindow();
+    return 0;
+}
+
+int pather_main() {
+    Font font    = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
+    bool editing = false;
+
+    while (!WindowShouldClose()) {
+        BeginDrawing();
+        ClearBackground(GetColor(0x181818ff));
+        EndDrawing();
+    }
+    CloseWindow();
+    return 0;
+}
+
+int main(int argc, char** argv) {
+    SetConfigFlags(FLAG_FULLSCREEN_MODE | FLAG_VSYNC_HINT);
+    InitWindow(WindowSize.x, WindowSize.y, "Hello world!");
+
+    if (argc == 2) {
+        if (strcmp(argv[1], "pather") == 0) {
+            return pather_main();
+        }
+    }
+    return game_main();
 }

@@ -26,4 +26,5 @@ add_executable(ctd ${SOURCES})
 target_include_directories(ctd PRIVATE ${CMAKE_SOURCE_DIR}/external/raylib/src)
 
 target_link_libraries(ctd raylib)
+
 add_dependencies(ctd copy_assets)
