@@ -113,7 +113,7 @@ public:
 
 int game_main() {
     Font font = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
-    Path p("assets/test_path.path");
+    Path p("assets/level1.path");
     Enemy e(p);
 
     while (!WindowShouldClose()) {

@@ -15,6 +15,5 @@ public:
     void Draw() const;
     const std::vector<Vector2>& GetPoints() const;
     void Save(const char* out, size_t n);
-
     const Vector2& Beginning() const;
 };
