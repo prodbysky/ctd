@@ -4,8 +4,8 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
-#include <iostream>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -43,6 +43,7 @@ private:
     size_t n_points;
     size_t curr_target_i;
     bool finished;
+    Vector2 move_dir;
 
 public:
     Enemy(const Path& p) {
@@ -52,11 +53,13 @@ public:
         pos           = p.Beginning();
         target        = p.GetPoints()[curr_target_i];
         speed         = 200;
+        move_dir      = Vector2Normalize(Vector2Subtract(target, pos));
     }
 
     void NextTarget(const Path& p) {
         if (curr_target_i + 1 != n_points) {
-            target = p.GetPoints()[++curr_target_i];
+            target   = p.GetPoints()[++curr_target_i];
+            move_dir = Vector2Normalize(Vector2Subtract(target, pos));
             return;
         }
         finished = true;
@@ -66,47 +69,11 @@ public:
         if (finished) {
             return;
         }
-        bool y   = false;
-        bool x   = false;
-        float dt = GetFrameTime();
-        if (target.x - pos.x == 0)
-            y = true;
-        if (target.y - pos.y == 0)
-            x = true;
+        const float dt = GetFrameTime();
 
-        if (x) {
-            if (pos.x < target.x) {
-                pos.x += speed * dt;
-                pos.x  = Clamp(pos.x, pos.x, target.x);
-                if (pos.x == target.x) {
-                    NextTarget(p);
-                    return;
-                }
-            } else {
-                pos.x -= speed * dt;
-
-                pos.x = Clamp(pos.x, target.x, pos.x);
-                if (pos.x == target.x) {
-                    NextTarget(p);
-                    return;
-                }
-            }
-        } else {
-            if (pos.y < target.y) {
-                pos.y += speed * dt;
-                pos.y  = Clamp(pos.y, pos.y, target.y);
-                if (pos.y == target.y) {
-                    NextTarget(p);
-                    return;
-                }
-            } else {
-                pos.y -= speed * dt;
-                pos.y  = Clamp(pos.y, target.y, pos.y);
-                if (pos.y == target.y) {
-                    NextTarget(p);
-                    return;
-                }
-            }
+        pos = Vector2Add(pos, Vector2Scale(move_dir, speed * dt));
+        if (Vector2Distance(pos, target) < speed * dt) {
+            NextTarget(p);
         }
     }
 };
