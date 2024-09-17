@@ -3,9 +3,11 @@
 
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -25,7 +27,7 @@ void draw_play_area() {
 void draw_stats(Font font) {
     const size_t font_size = 48;
     Vector2 size           = MeasureTextEx(font, "", font_size, 0);
-    DrawTextEx(font, TextFormat("Health: 100/%d", health), {10, 10}, font_size,
+    DrawTextEx(font, TextFormat("Health: %d/100", health), {10, 10}, font_size,
                size.x, WHITE);
     DrawTextEx(font, TextFormat("Money: %d", money), {10, 10 + size.y},
                font_size, size.x, WHITE);
@@ -33,55 +35,105 @@ void draw_stats(Font font) {
                font_size, size.x, WHITE);
 }
 
-struct Enemy {
+class PathFollower {
 public:
-    Vector2 pos;
-
-private:
-    Vector2 target;
-    float speed;
-    size_t n_points;
-    size_t curr_target_i;
-    bool finished;
-    Vector2 move_dir;
-
-public:
-    Enemy(const Path& p) {
-        curr_target_i = 1;
-        finished      = false;
-        n_points      = p.GetPoints().size();
-        pos           = p.Beginning();
-        target        = p.GetPoints()[curr_target_i];
-        speed         = 200;
-        move_dir      = Vector2Normalize(Vector2Subtract(target, pos));
+    PathFollower() = default;
+    PathFollower(const Path& p, float w, float h) :
+        finished(false), iter(p.GetPoints().begin()) {
+        rect      = {.x      = iter->x - w / 2,
+                     .y      = iter->y - h / 2,
+                     .width  = w,
+                     .height = h};
+        target    = *(++iter);
+        target.x -= w / 2;
+        target.y -= h / 2;
+        move_dir  = Vector2Normalize(Vector2Subtract(target, Pos()));
     }
 
+    Vector2 Pos() { return {.x = rect.x, .y = rect.y}; }
+
     void NextTarget(const Path& p) {
-        if (curr_target_i + 1 != n_points) {
-            target   = p.GetPoints()[++curr_target_i];
-            move_dir = Vector2Normalize(Vector2Subtract(target, pos));
+        if (iter < p.GetPoints().end()) {
+            target    = *(++iter);
+            target.x -= rect.width / 2;
+            target.y -= rect.height / 2;
+            move_dir  = Vector2Normalize(Vector2Subtract(target, Pos()));
             return;
         }
         finished = true;
     }
 
-    void Update(const Path& p) {
+    void Update(const Path& p, float speed) {
         if (finished) {
             return;
         }
         const float dt = GetFrameTime();
 
-        pos = Vector2Add(pos, Vector2Scale(move_dir, speed * dt));
-        if (Vector2Distance(pos, target) < speed * dt) {
+        Vector2 diff = Vector2Add(Pos(), Vector2Scale(move_dir, speed * dt));
+        rect.x       = diff.x;
+        rect.y       = diff.y;
+        if (Vector2Distance(diff, target) < speed * dt) {
             NextTarget(p);
         }
     }
+
+public:
+    Rectangle rect;
+    bool finished;
+
+private:
+    Vector2 move_dir;
+    Vector2 target;
+    std::vector<Vector2>::const_iterator iter;
+};
+
+// speed, type
+// Speed: uint8_t
+// Type: uint8_t
+// Where Type:
+// 0x00 -> C
+// 0x01 -> C++
+// 0x02 -> Python
+// ...
+
+enum EnemyType : uint8_t {
+    ET_C      = 0,
+    ET_CPP    = 1,
+    ET_PYTHON = 2,
+};
+
+const static Rectangle SpritesLoc[] = {
+    [ET_C]      = {.x = 0,   .y = 0, .width = 96, .height = 96},
+    [ET_CPP]    = {.x = 96,  .y = 0, .width = 96, .height = 96},
+    [ET_PYTHON] = {.x = 192, .y = 0, .width = 96, .height = 96},
+};
+
+class Enemy {
+public:
+    Enemy() = default;
+    Enemy(const Path& p, FILE* from) {
+        fread(&m_speed, 1, 1, from);
+        EnemyType t;
+        fread(&t, 1, 1, from);
+        sprite_atlas_pos = SpritesLoc[t];
+        follower =
+            PathFollower(p, sprite_atlas_pos.width, sprite_atlas_pos.height);
+    }
+    void Update(const Path& p) { follower.Update(p, m_speed); }
+
+public:
+    PathFollower follower;
+
+private:
+    uint8_t m_speed;
+    Rectangle sprite_atlas_pos;
 };
 
 int game_main() {
     Font font = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
     Path p("assets/level1.path");
-    Enemy e(p);
+    FILE* file = fopen("assets/test.enemy", "rb");
+    Enemy e(p, file);
 
     while (!WindowShouldClose()) {
         e.Update(p);
@@ -91,7 +143,7 @@ int game_main() {
         // draw_play_area();
         draw_stats(font);
         p.Draw();
-        DrawCircleV(e.pos, 10, WHITE);
+        DrawRectangleRec(e.follower.rect, WHITE);
         EndDrawing();
     }
     CloseWindow();
