@@ -43,7 +43,8 @@ void draw_stats(Font font) {
 }
 
 int game_main() {
-    Font font = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
+    Font font       = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
+    Texture2D atlas = LoadTexture("assets/atlas.png");
     Path p("assets/level1.path");
     FILE* file = fopen("assets/test.enemy", "rb");
     Enemy e(p, file);
@@ -56,7 +57,8 @@ int game_main() {
         // draw_play_area();
         draw_stats(font);
         p.Draw();
-        DrawRectangleRec(e.follower.rect, WHITE);
+        e.Draw(atlas);
+        // DrawRectangleRec(e.follower.rect, WHITE);
         EndDrawing();
     }
     CloseWindow();

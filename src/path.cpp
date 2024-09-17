@@ -4,7 +4,6 @@
 #include "dyn_array.hpp"
 
 #include <cstdio>
-#include <iostream>
 #include <raymath.h>
 
 Path::Path(const char* file_name) {

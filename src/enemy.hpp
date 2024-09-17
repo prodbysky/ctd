@@ -13,17 +13,12 @@ enum EnemyType : uint8_t {
     ET_COUNT,
 };
 
-const static Rectangle SpritesLoc[] = {
-    [ET_C]      = {.x = 0,   .y = 0, .width = 96, .height = 96},
-    [ET_CPP]    = {.x = 96,  .y = 0, .width = 96, .height = 96},
-    [ET_PYTHON] = {.x = 192, .y = 0, .width = 96, .height = 96},
-};
-
 class Enemy {
 public:
     Enemy() = default;
     Enemy(const Path& p, FILE* from);
     void Update(const Path& p);
+    void Draw(const Texture2D& atlas) const;
 
 public:
     PathFollower follower;

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
+#include <cstring>
 #include <initializer_list>
 template <class T> class DynArray {
 public:
@@ -31,7 +31,8 @@ public:
         elements = (T*) malloc(sizeof(T) * other.cap);
         cap      = other.cap;
         used     = other.used;
-        std::copy(other.Begin(), other.Begin() + other.used, elements);
+        memcpy(elements, other.elements, other.used * sizeof(T));
+        // std::copy(other.Begin(), other.Begin() + other.used, elements);
     }
 
     // Assignment operator
@@ -41,7 +42,8 @@ public:
             elements = (T*) malloc(sizeof(T) * other.cap);
             cap      = other.cap;
             used     = other.used;
-            std::copy(other.Begin(), other.Begin() + other.used, elements);
+            memcpy(elements, other.elements, other.used * sizeof(T));
+            // std::copy(other.Begin(), other.Begin() + other.used, elements);
         }
         return *this;
     }
