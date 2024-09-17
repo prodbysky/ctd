@@ -16,7 +16,8 @@
 static size_t health    = 100;
 static size_t round_num = 1;
 static size_t money     = 100;
-const char* ETStr[]     = {
+
+const char* ETStr[] = {
     [ET_C]      = "C",
     [ET_CPP]    = "C++",
     [ET_PYTHON] = "Python",
