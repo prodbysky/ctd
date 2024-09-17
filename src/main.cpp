@@ -2,16 +2,9 @@
 #include "enemy.hpp"
 #include "path.hpp"
 
-#include <cmath>
-#include <cstddef>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
 #include <raylib.h>
 #include <raymath.h>
-#include <string>
 
 static size_t health    = 100;
 static size_t round_num = 1;
@@ -22,6 +15,7 @@ const char* ETStr[] = {
     [ET_CPP]    = "C++",
     [ET_PYTHON] = "Python",
 };
+
 void draw_play_area() {
     for (int y = 0; y < play_area_rect.height / TileSize; y++) {
         for (int x = 0; x < play_area_rect.width / TileSize; x++) {
@@ -32,8 +26,15 @@ void draw_play_area() {
 }
 
 void draw_stats(Font font) {
-    const size_t font_size = 48;
-    Vector2 size           = MeasureTextEx(font, "", font_size, 0);
+    const size_t font_size     = 48;
+    const Rectangle stats_rect = {
+        .x      = 0,
+        .y      = 0,
+        .width  = 350,
+        .height = 200,
+    };
+    DrawRectangleRec(stats_rect, GetColor(0x00000066));
+    Vector2 size = MeasureTextEx(font, "", font_size, 0);
     DrawTextEx(font, TextFormat("Health: %d/100", health), {10, 10}, font_size,
                size.x, WHITE);
     DrawTextEx(font, TextFormat("Money: %d", money), {10, 10 + size.y},
@@ -43,7 +44,7 @@ void draw_stats(Font font) {
 }
 
 int game_main() {
-    Font font       = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
+    Font font       = LoadFontEx("assets/iosevka.ttf", 96, nullptr, 250);
     Texture2D atlas = LoadTexture("assets/atlas.png");
     Path p("assets/level1.path");
     FILE* file = fopen("assets/test.enemy", "rb");
@@ -55,10 +56,9 @@ int game_main() {
         ClearBackground(GetColor(0x181818ff));
         DrawRectangleRec(tower_menu_rect, RED);
         // draw_play_area();
-        draw_stats(font);
         p.Draw();
         e.Draw(atlas);
-        // DrawRectangleRec(e.follower.rect, WHITE);
+        draw_stats(font);
         EndDrawing();
     }
     CloseWindow();
@@ -66,7 +66,7 @@ int game_main() {
 }
 
 int pather_main() {
-    Font font              = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
+    Font font              = LoadFontEx("assets/iosevka.ttf", 96, nullptr, 250);
     bool editing           = false;
     const size_t font_size = 48;
     Vector2 size           = MeasureTextEx(font, "", font_size, 0);
@@ -125,7 +125,7 @@ int pather_main() {
 
 int enemy_maker_main() {
     SetTargetFPS(30);
-    Font font              = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
+    Font font              = LoadFontEx("assets/iosevka.ttf", 96, nullptr, 250);
     const size_t font_size = 96;
     Vector2 size_96        = MeasureTextEx(font, "", font_size, 0);
     Vector2 size_36        = MeasureTextEx(font, "", 36, 0);

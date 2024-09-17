@@ -72,7 +72,7 @@ public:
     }
 
     T* Begin() const { return &elements[0]; }
-    T* End() const { return &elements[cap - 1]; }
+    T* End() const { return &elements[used]; }
     const T* BeginConst() const { return &elements[0]; }
     const T* EndConst() const { return &elements[used]; }
     size_t Len() const { return used; }
