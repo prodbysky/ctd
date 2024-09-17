@@ -7,7 +7,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <iostream>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -53,7 +52,7 @@ public:
     Vector2 Pos() { return {.x = rect.x, .y = rect.y}; }
 
     void NextTarget(const Path& p) {
-        if (iter < p.GetPoints().end()) {
+        if (iter + 1 != p.GetPoints().end()) {
             target    = *(++iter);
             target.x -= rect.width / 2;
             target.y -= rect.height / 2;
