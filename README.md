@@ -10,6 +10,11 @@ First byte is the base speed of the enemy,
 Second byte is the type of the enemy
 
 ## TODO:
+ - [ ] Towers
+ - [ ] Rounds (Groups of enemies)
+ - [ ] More types of enemies
+ - [ ] Art :( 
+
 
 ## Build
 ```bash
