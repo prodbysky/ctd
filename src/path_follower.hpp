@@ -18,5 +18,5 @@ public:
 private:
     Vector2 move_dir;
     Vector2 target;
-    std::vector<Vector2>::const_iterator iter;
+    Vector2* iter;
 };

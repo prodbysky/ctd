@@ -4,7 +4,7 @@
 
 PathFollower::PathFollower(const Path& p, float w, float h) :
 
-    finished(false), iter(p.GetPoints().begin()) {
+    finished(false), iter(p.GetPoints().Begin()) {
     rect = {
         .x = iter->x - w / 2, .y = iter->y - h / 2, .width = w, .height = h};
     target    = *(++iter);
@@ -16,7 +16,7 @@ PathFollower::PathFollower(const Path& p, float w, float h) :
 Vector2 PathFollower::Pos() { return {.x = rect.x, .y = rect.y}; }
 
 void PathFollower::NextTarget(const Path& p) {
-    if (iter + 1 != p.GetPoints().end()) {
+    if (iter + 1 != p.GetPoints().End()) {
         target    = *(++iter);
         target.x -= rect.width / 2;
         target.y -= rect.height / 2;

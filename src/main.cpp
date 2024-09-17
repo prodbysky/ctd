@@ -90,7 +90,7 @@ int pather_main() {
                            tower_menu_rect.width, tower_menu_rect.height,
                            WHITE);
         draw_play_area();
-        if (p.GetPoints().empty()) {
+        if (p.GetPoints().Empty()) {
             DrawTextEx(
                 font,
                 "Click a point in the grid to mark the beginning of the path",
