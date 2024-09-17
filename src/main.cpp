@@ -7,8 +7,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <raylib.h>
 #include <raymath.h>
+#include <string>
 
 static size_t health    = 100;
 static size_t round_num = 1;
@@ -99,6 +101,13 @@ enum EnemyType : uint8_t {
     ET_C      = 0,
     ET_CPP    = 1,
     ET_PYTHON = 2,
+    ET_COUNT,
+};
+
+const static char* ETStr[] = {
+    [ET_C]      = "C",
+    [ET_CPP]    = "C++",
+    [ET_PYTHON] = "Python",
 };
 
 const static Rectangle SpritesLoc[] = {
@@ -198,8 +207,62 @@ int pather_main() {
         p.Draw();
         EndDrawing();
     }
-    p.Save("path.path", n);
+
     CloseWindow();
+    std::cout << "Enter the path to save the path to:";
+    std::string path;
+    std::cin >> path;
+    p.Save(path.c_str(), n);
+    return 0;
+}
+
+int enemy_maker_main() {
+    SetTargetFPS(30);
+    Font font              = LoadFontEx("assets/agave.ttf", 96, nullptr, 250);
+    const size_t font_size = 96;
+    Vector2 size_96        = MeasureTextEx(font, "", font_size, 0);
+    Vector2 size_36        = MeasureTextEx(font, "", 36, 0);
+
+    uint8_t speed  = 200;
+    uint8_t e_type = 0;
+
+    while (!WindowShouldClose()) {
+        BeginDrawing();
+        DrawTextEx(font, TextFormat("Enemy speed: %d/255", speed), {10, 10},
+                   font_size, 0, WHITE);
+        DrawTextEx(font, TextFormat("Press `d` to increase speed", speed),
+                   {10, 10 + size_96.y}, 36, 0, WHITE);
+        DrawTextEx(font, TextFormat("Press `a` to decrease speed", speed),
+                   {10, 10 + size_96.y + size_36.y}, 36, 0, WHITE);
+
+        DrawTextEx(font, TextFormat("Enemy type: %s", ETStr[e_type]),
+                   {10, 10 + size_96.y + 3 * size_36.y}, font_size, 0, WHITE);
+
+        DrawTextEx(font, "Press `e` to change enemy type",
+                   {10, 10 + 2 * size_96.y + 3 * size_36.y}, 36, 0, WHITE);
+
+        if (IsKeyDown(KEY_D)) {
+            speed += 1;
+        }
+        if (IsKeyDown(KEY_A)) {
+            speed -= 1;
+        }
+        if (IsKeyPressed(KEY_E)) {
+            e_type++;
+            e_type %= ET_COUNT;
+        }
+
+        ClearBackground(GetColor(0x181818ff));
+        EndDrawing();
+    }
+    CloseWindow();
+    std::cout << "Enter the path to save the enemy to:";
+    std::string path;
+    std::cin >> path;
+    FILE* file = fopen(path.c_str(), "wb");
+    fputc(speed, file);
+    fputc(e_type, file);
+    fclose(file);
     return 0;
 }
 
@@ -208,8 +271,11 @@ int main(int argc, char** argv) {
     InitWindow(WindowSize.x, WindowSize.y, "Hello world!");
 
     if (argc == 2) {
-        if (strcmp(argv[1], "pather") == 0) {
+        if (strcmp(argv[1], "make_path") == 0) {
             return pather_main();
+        }
+        if (strcmp(argv[1], "make_enemy") == 0) {
+            return enemy_maker_main();
         }
     }
     return game_main();
