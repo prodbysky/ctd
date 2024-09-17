@@ -20,6 +20,8 @@ add_custom_target(copy_assets ALL
 set(SOURCES 
     src/main.cpp
     src/path.cpp
+    src/path_follower.cpp
+    src/enemy.cpp
 )
 
 add_executable(ctd ${SOURCES})
