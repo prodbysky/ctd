@@ -1,2 +1,2 @@
 CompileFlags:
-  Add: [-Wall, -Werror]
+  Add: [-Wall, -Werror, -Wno-c99-designator]
