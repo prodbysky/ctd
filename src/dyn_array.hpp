@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <initializer_list>
+
 template <class T> class DynArray {
 public:
     DynArray() {
